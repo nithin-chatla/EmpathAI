@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dr. Serene - AI Medical Consultant</title>
     
     <!-- Tailwind CSS -->
@@ -17,6 +17,14 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            /* Use dynamic viewport height for mobile browsers */
+            height: 100dvh; 
+            overflow: hidden;
+        }
+        
+        /* Safe area padding for modern mobile devices (Notch/Home Bar) */
+        .safe-bottom {
+            padding-bottom: env(safe-area-inset-bottom);
         }
         
         /* Animations */
@@ -35,7 +43,7 @@
             animation: fadeInUp 0.3s ease-out forwards;
         }
 
-        /* Custom Scrollbar */
+        /* Custom Scrollbar - nice to have for desktop, hidden for cleaner mobile look */
         .scrollbar-hide::-webkit-scrollbar {
             display: none;
         }
@@ -54,16 +62,18 @@
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 h-screen overflow-hidden flex flex-col md:flex-row">
+<!-- Flex-col on mobile, Flex-row on medium screens+ (Tablets/Laptops) -->
+<body class="bg-slate-50 text-slate-800 flex flex-col md:flex-row relative">
 
     <!-- Mobile Sidebar Overlay -->
-    <div id="sidebar-overlay" class="fixed inset-0 bg-black/20 z-20 hidden backdrop-blur-sm md:hidden"></div>
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/20 z-40 hidden backdrop-blur-sm md:hidden"></div>
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="fixed md:relative z-30 h-full w-72 bg-white border-r border-slate-200 shadow-xl md:shadow-none transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col">
+    <!-- Z-index 50 ensures it floats above everything on mobile -->
+    <aside id="sidebar" class="fixed md:relative z-50 h-full w-72 bg-white border-r border-slate-200 shadow-2xl md:shadow-none transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col">
         
         <!-- Sidebar Header -->
-        <div class="p-6 border-b border-slate-100 bg-blue-50/50">
+        <div class="p-6 border-b border-slate-100 bg-blue-50/50 pt-safe-top">
             <div class="flex items-center space-x-3 mb-1">
                 <div class="p-2 bg-blue-600 rounded-lg">
                     <i data-lucide="stethoscope" class="w-6 h-6 text-white"></i>
@@ -83,7 +93,7 @@
                     <span class="font-semibold text-sm">Emergency?</span>
                 </div>
                 <p class="text-xs text-red-600 mb-3">For medical emergencies, do not use this app.</p>
-                <button onclick="window.location.href='tel:911'" class="w-full bg-white border border-red-200 text-red-600 py-2 px-3 rounded-lg text-sm font-medium hover:bg-red-50 transition flex items-center justify-center">
+                <button onclick="window.location.href='tel:911'" class="w-full bg-white border border-red-200 text-red-600 py-2 px-3 rounded-lg text-sm font-medium hover:bg-red-50 transition flex items-center justify-center active:scale-95">
                     Call 911 (Emergency)
                 </button>
             </div>
@@ -110,7 +120,7 @@
             </div>
             
             <!-- Disclaimer -->
-            <div class="bg-yellow-50 rounded-xl p-4">
+            <div class="bg-yellow-50 rounded-xl p-4 mb-safe-bottom">
                  <div class="flex items-start space-x-2">
                     <i data-lucide="info" class="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0"></i>
                     <p class="text-xs text-yellow-800 leading-relaxed">
@@ -121,18 +131,18 @@
         </div>
 
         <!-- Close Sidebar Button (Mobile) -->
-        <button id="close-sidebar" class="md:hidden absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600">
+        <button id="close-sidebar" class="md:hidden absolute top-4 right-4 p-3 text-slate-400 hover:text-slate-600 active:bg-slate-100 rounded-full">
             <i data-lucide="x" class="w-6 h-6"></i>
         </button>
     </aside>
 
     <!-- Main Chat Area -->
-    <main class="flex-1 flex flex-col h-full w-full bg-slate-50 relative">
+    <main class="flex-1 flex flex-col h-full w-full bg-slate-50 relative min-w-0">
         
         <!-- Header -->
-        <header class="bg-white h-16 border-b border-slate-200 flex items-center justify-between px-4 md:px-8 sticky top-0 z-10">
+        <header class="bg-white h-16 border-b border-slate-200 flex items-center justify-between px-4 md:px-8 sticky top-0 z-10 shrink-0">
             <div class="flex items-center">
-                <button id="open-sidebar" class="mr-4 p-2 -ml-2 rounded-lg hover:bg-slate-100 md:hidden text-slate-600">
+                <button id="open-sidebar" class="mr-4 p-2 -ml-2 rounded-lg hover:bg-slate-100 md:hidden text-slate-600 active:bg-slate-200">
                     <i data-lucide="menu" class="w-6 h-6"></i>
                 </button>
                 <div class="flex flex-col">
@@ -146,7 +156,7 @@
         </header>
 
         <!-- Messages Container -->
-        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 scroll-smooth">
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 scroll-smooth w-full">
             <div class="flex justify-center mb-8">
                 <span class="bg-slate-200/60 text-slate-500 text-xs py-1 px-3 rounded-full">
                   Today
@@ -156,25 +166,27 @@
         </div>
 
         <!-- Input Area -->
-        <div class="p-4 md:p-6 bg-white border-t border-slate-200">
+        <div class="p-4 md:p-6 bg-white border-t border-slate-200 shrink-0 safe-bottom">
             <form id="chat-form" class="max-w-4xl mx-auto relative flex items-center">
                 <input 
                     type="text" 
                     id="user-input" 
                     placeholder="Describe your symptoms..." 
                     autocomplete="off"
-                    class="w-full bg-slate-100 text-slate-800 placeholder-slate-400 border-0 rounded-2xl py-4 pl-5 pr-14 focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all shadow-inner outline-none"
+                    class="w-full bg-slate-100 text-slate-800 placeholder-slate-400 border-0 rounded-2xl py-4 pl-5 pr-14 focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all shadow-inner outline-none text-base"
                 >
+                <!-- Text-base above prevents iOS zoom on focus -->
+                
                 <button 
                     type="submit" 
                     id="send-btn"
                     disabled
-                    class="absolute right-2 p-2 rounded-xl transition-all duration-200 bg-slate-200 text-slate-400 cursor-not-allowed"
+                    class="absolute right-2 p-2 rounded-xl transition-all duration-200 bg-slate-200 text-slate-400 cursor-not-allowed flex items-center justify-center"
                 >
                     <i data-lucide="send" class="w-5 h-5"></i>
                 </button>
             </form>
-            <p class="text-center text-[10px] text-slate-400 mt-3">
+            <p class="text-center text-[10px] text-slate-400 mt-3 hidden md:block">
                 Dr. Serene is an AI and can make mistakes. Always verify with a human professional.
             </p>
         </div>
@@ -247,6 +259,8 @@
         }
 
         function renderMessages() {
+            // We clear and rebuild to ensure order, though appending is more efficient in huge chats. 
+            // For this scale, rebuilding is safer for state sync.
             chatMessages.innerHTML = `
                 <div class="flex justify-center mb-8">
                     <span class="bg-slate-200/60 text-slate-500 text-xs py-1 px-3 rounded-full">Today</span>
@@ -264,7 +278,7 @@
                         ? 'bg-white text-slate-800 rounded-tl-none border border-slate-200' 
                         : 'bg-blue-600 text-white rounded-tr-none'
                     }">
-                        <p class="text-sm md:text-base leading-relaxed whitespace-pre-wrap">${msg.text}</p>
+                        <p class="text-sm md:text-base leading-relaxed whitespace-pre-wrap break-words">${msg.text}</p>
                         <span class="text-xs mt-1 block ${isBot ? 'text-slate-400' : 'text-blue-100 opacity-70'}">
                             ${msg.time}
                         </span>
@@ -315,7 +329,7 @@
             };
             
             chatHistory.push(userMsg);
-            renderMessages(); // Re-render to show user message
+            renderMessages(); 
             userInput.value = '';
             sendBtn.disabled = true;
             sendBtn.classList.add('bg-slate-200', 'text-slate-400', 'cursor-not-allowed');
@@ -361,21 +375,9 @@
             // Skip the very first welcome message from bot
             chatHistory.forEach((msg, index) => {
                 if (index === 0 && msg.sender === 'bot') return;
-                // Don't include the message we just added locally (latestMessage is passed explicitly for logic clarity, but strictly speaking it's already in chatHistory. 
-                // Ideally we reconstruct from chatHistory excluding the one we just pushed, OR we just map everything.)
-                // Let's map everything except the last one if we want to be safe, but actually 1.5-flash is stateless so we need full history.
-                // Since we pushed userMsg to history before calling this, we map history.
             });
 
-            // We need to construct the payload carefully. 
-            // The history contains the latest user message.
-            // We need to prepend system prompt if it's the start.
-            
             const apiContents = [];
-            
-            // If history is small (just welcome + 1 user msg), prepend system prompt to the first user message
-            // However, 'contents' array logic:
-            
             let firstUserMsgFound = false;
             
             for (let i = 0; i < chatHistory.length; i++) {
