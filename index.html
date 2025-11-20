@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dr. Serene - AI Medical Consultant</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fade-in-up {
+            animation: fadeInUp 0.3s ease-out forwards;
+        }
+
+        /* Custom Scrollbar */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        /* Typing Bounce Animation */
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+        .animate-bounce-dot {
+            animation: bounce 0.6s infinite;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 h-screen overflow-hidden flex flex-col md:flex-row">
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/20 z-20 hidden backdrop-blur-sm md:hidden"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed md:relative z-30 h-full w-72 bg-white border-r border-slate-200 shadow-xl md:shadow-none transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col">
+        
+        <!-- Sidebar Header -->
+        <div class="p-6 border-b border-slate-100 bg-blue-50/50">
+            <div class="flex items-center space-x-3 mb-1">
+                <div class="p-2 bg-blue-600 rounded-lg">
+                    <i data-lucide="stethoscope" class="w-6 h-6 text-white"></i>
+                </div>
+                <h1 class="text-xl font-bold text-slate-800">Dr. Serene</h1>
+            </div>
+            <p class="text-xs text-slate-500 mt-2">AI Medical Consultant</p>
+        </div>
+
+        <!-- Sidebar Content -->
+        <div class="flex-1 overflow-y-auto p-6 space-y-8">
+            
+            <!-- Crisis Card -->
+            <div class="bg-red-50 border border-red-100 rounded-xl p-4">
+                <div class="flex items-center space-x-2 text-red-700 mb-2">
+                    <i data-lucide="phone" class="w-4 h-4"></i>
+                    <span class="font-semibold text-sm">Emergency?</span>
+                </div>
+                <p class="text-xs text-red-600 mb-3">For medical emergencies, do not use this app.</p>
+                <button onclick="window.location.href='tel:911'" class="w-full bg-white border border-red-200 text-red-600 py-2 px-3 rounded-lg text-sm font-medium hover:bg-red-50 transition flex items-center justify-center">
+                    Call 911 (Emergency)
+                </button>
+            </div>
+
+            <!-- Features -->
+            <div>
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Capabilities</h3>
+                <div class="space-y-4">
+                    <div class="flex items-start space-x-3">
+                        <i data-lucide="shield" class="w-5 h-5 text-blue-600 mt-0.5"></i>
+                        <div>
+                            <h4 class="text-sm font-medium text-slate-700">Symptom Check</h4>
+                            <p class="text-xs text-slate-500">Step-by-step analysis.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <i data-lucide="activity" class="w-5 h-5 text-blue-600 mt-0.5"></i>
+                        <div>
+                            <h4 class="text-sm font-medium text-slate-700">Health Advice</h4>
+                            <p class="text-xs text-slate-500">Concise medical guidance.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Disclaimer -->
+            <div class="bg-yellow-50 rounded-xl p-4">
+                 <div class="flex items-start space-x-2">
+                    <i data-lucide="info" class="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0"></i>
+                    <p class="text-xs text-yellow-800 leading-relaxed">
+                      <strong>Disclaimer:</strong> I am an AI. My advice is for informational purposes only. Always consult a real doctor for final diagnosis.
+                    </p>
+                 </div>
+            </div>
+        </div>
+
+        <!-- Close Sidebar Button (Mobile) -->
+        <button id="close-sidebar" class="md:hidden absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600">
+            <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+    </aside>
+
+    <!-- Main Chat Area -->
+    <main class="flex-1 flex flex-col h-full w-full bg-slate-50 relative">
+        
+        <!-- Header -->
+        <header class="bg-white h-16 border-b border-slate-200 flex items-center justify-between px-4 md:px-8 sticky top-0 z-10">
+            <div class="flex items-center">
+                <button id="open-sidebar" class="mr-4 p-2 -ml-2 rounded-lg hover:bg-slate-100 md:hidden text-slate-600">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+                <div class="flex flex-col">
+                    <span class="font-bold text-slate-800">Medical Consultation</span>
+                    <span class="text-xs text-blue-500 flex items-center">
+                        <span class="w-2 h-2 bg-blue-500 rounded-full mr-1.5"></span>
+                        Dr. Serene Active
+                    </span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Messages Container -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 scroll-smooth">
+            <div class="flex justify-center mb-8">
+                <span class="bg-slate-200/60 text-slate-500 text-xs py-1 px-3 rounded-full">
+                  Today
+                </span>
+            </div>
+            <!-- Messages will be injected here by JS -->
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-4 md:p-6 bg-white border-t border-slate-200">
+            <form id="chat-form" class="max-w-4xl mx-auto relative flex items-center">
+                <input 
+                    type="text" 
+                    id="user-input" 
+                    placeholder="Describe your symptoms..." 
+                    autocomplete="off"
+                    class="w-full bg-slate-100 text-slate-800 placeholder-slate-400 border-0 rounded-2xl py-4 pl-5 pr-14 focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all shadow-inner outline-none"
+                >
+                <button 
+                    type="submit" 
+                    id="send-btn"
+                    disabled
+                    class="absolute right-2 p-2 rounded-xl transition-all duration-200 bg-slate-200 text-slate-400 cursor-not-allowed"
+                >
+                    <i data-lucide="send" class="w-5 h-5"></i>
+                </button>
+            </form>
+            <p class="text-center text-[10px] text-slate-400 mt-3">
+                Dr. Serene is an AI and can make mistakes. Always verify with a human professional.
+            </p>
+        </div>
+    </main>
+
+    <script>
+        // --- Configuration ---
+        const API_KEY = "AIzaSyDdSjlVHq073_R6nL9KliJH6lYJlS1zs_4";
+        const SYSTEM_PROMPT = "You are Dr. Serene, a professional medical doctor AI. Your goal is to solve health problems through a step-by-step interview. \n\nCRITICAL RULES:\n1. Ask ONLY ONE clarifying question at a time. Do not ask lists of questions.\n2. Keep your responses SHORT and concise (maximum 2-3 sentences).\n3. Do not provide a full diagnosis or treatment plan immediately. Gather information first through back-and-forth dialogue.\n4. Once you have enough info, provide a brief diagnosis and advice.\n5. ALWAYS explicitly state that you are an AI and this is not a substitute for in-person professional medical advice.\n6. If the user mentions self-harm, suicide, or heart attack/stroke symptoms, stop the interview and provide emergency resources immediately.\n7. Use bullet points (-) to structure lists or advice for better readability. Avoid bolding or other markdown.";
+
+        // --- State ---
+        let chatHistory = [
+            { 
+                text: "Hello, I am Dr. Serene. I'm here to help with your health concerns. Briefly tell me what you are feeling, and I will ask you a few questions to understand better.", 
+                sender: 'bot', 
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+            }
+        ];
+        let isTyping = false;
+
+        // --- DOM Elements ---
+        const chatMessages = document.getElementById('chat-messages');
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const openSidebarBtn = document.getElementById('open-sidebar');
+        const closeSidebarBtn = document.getElementById('close-sidebar');
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            renderMessages();
+            setupEventListeners();
+        });
+
+        // --- UI Functions ---
+
+        function setupEventListeners() {
+            // Input handling
+            userInput.addEventListener('input', () => {
+                if (userInput.value.trim() !== '') {
+                    sendBtn.disabled = false;
+                    sendBtn.classList.remove('bg-slate-200', 'text-slate-400', 'cursor-not-allowed');
+                    sendBtn.classList.add('bg-blue-600', 'text-white', 'shadow-md', 'hover:bg-blue-700', 'hover:scale-105');
+                } else {
+                    sendBtn.disabled = true;
+                    sendBtn.classList.add('bg-slate-200', 'text-slate-400', 'cursor-not-allowed');
+                    sendBtn.classList.remove('bg-blue-600', 'text-white', 'shadow-md', 'hover:bg-blue-700', 'hover:scale-105');
+                }
+            });
+
+            // Form Submission
+            chatForm.addEventListener('submit', handleSend);
+
+            // Sidebar Toggles
+            openSidebarBtn.addEventListener('click', () => {
+                sidebar.classList.remove('-translate-x-full');
+                sidebarOverlay.classList.remove('hidden');
+            });
+
+            closeSidebarBtn.addEventListener('click', closeSidebar);
+            sidebarOverlay.addEventListener('click', closeSidebar);
+        }
+
+        function closeSidebar() {
+            sidebar.classList.add('-translate-x-full');
+            sidebarOverlay.classList.add('hidden');
+        }
+
+        function renderMessages() {
+            chatMessages.innerHTML = `
+                <div class="flex justify-center mb-8">
+                    <span class="bg-slate-200/60 text-slate-500 text-xs py-1 px-3 rounded-full">Today</span>
+                </div>
+            `;
+            
+            chatHistory.forEach(msg => {
+                const isBot = msg.sender === 'bot';
+                const div = document.createElement('div');
+                div.className = `flex w-full ${isBot ? 'justify-start' : 'justify-end'} mb-4 animate-fade-in-up`;
+                
+                div.innerHTML = `
+                    <div class="max-w-[85%] md:max-w-[70%] rounded-2xl px-4 py-3 shadow-sm ${
+                        isBot 
+                        ? 'bg-white text-slate-800 rounded-tl-none border border-slate-200' 
+                        : 'bg-blue-600 text-white rounded-tr-none'
+                    }">
+                        <p class="text-sm md:text-base leading-relaxed whitespace-pre-wrap">${msg.text}</p>
+                        <span class="text-xs mt-1 block ${isBot ? 'text-slate-400' : 'text-blue-100 opacity-70'}">
+                            ${msg.time}
+                        </span>
+                    </div>
+                `;
+                chatMessages.appendChild(div);
+            });
+            
+            scrollToBottom();
+        }
+
+        function showTypingIndicator() {
+            const div = document.createElement('div');
+            div.id = 'typing-indicator';
+            div.className = 'flex justify-start mb-4 animate-fade-in-up';
+            div.innerHTML = `
+                <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-none px-4 py-4 shadow-sm flex items-center space-x-1">
+                    <div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce-dot" style="animation-delay: 0ms"></div>
+                    <div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce-dot" style="animation-delay: 150ms"></div>
+                    <div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce-dot" style="animation-delay: 300ms"></div>
+                </div>
+            `;
+            chatMessages.appendChild(div);
+            scrollToBottom();
+        }
+
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typing-indicator');
+            if (indicator) indicator.remove();
+        }
+
+        function scrollToBottom() {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // --- Logic Functions ---
+
+        async function handleSend(e) {
+            e.preventDefault();
+            const text = userInput.value.trim();
+            if (!text || isTyping) return;
+
+            // 1. Add User Message
+            const userMsg = {
+                text: text,
+                sender: 'user',
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
+            
+            chatHistory.push(userMsg);
+            renderMessages(); // Re-render to show user message
+            userInput.value = '';
+            sendBtn.disabled = true;
+            sendBtn.classList.add('bg-slate-200', 'text-slate-400', 'cursor-not-allowed');
+            sendBtn.classList.remove('bg-blue-600', 'text-white', 'shadow-md');
+            isTyping = true;
+            showTypingIndicator();
+
+            // 2. Safety Check (Local)
+            const lowerInput = text.toLowerCase();
+            const dangerKeywords = ['suicide', 'kill myself', 'want to die', 'heart attack', 'stroke', 'chest pain', 'severe bleeding'];
+            
+            if (dangerKeywords.some(kw => lowerInput.includes(kw))) {
+                setTimeout(() => {
+                    addBotMessage("EMERGENCY ALERT: If you are experiencing a life-threatening emergency (like heart attack, stroke, or severe injury) or thoughts of self-harm, please call 911 or your local emergency number IMMEDIATELY. Do not wait for an AI response.");
+                }, 1000);
+                return;
+            }
+
+            // 3. API Call
+            const responseText = await callGeminiAPI(text);
+            addBotMessage(responseText);
+        }
+
+        function addBotMessage(text) {
+            removeTypingIndicator();
+            isTyping = false;
+            
+            const botMsg = {
+                text: text,
+                sender: 'bot',
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
+            chatHistory.push(botMsg);
+            renderMessages();
+        }
+
+        // --- API Logic ---
+
+        async function callGeminiAPI(latestMessage) {
+            // Prepare contents for API
+            const contents = [];
+            
+            // Skip the very first welcome message from bot
+            chatHistory.forEach((msg, index) => {
+                if (index === 0 && msg.sender === 'bot') return;
+                // Don't include the message we just added locally (latestMessage is passed explicitly for logic clarity, but strictly speaking it's already in chatHistory. 
+                // Ideally we reconstruct from chatHistory excluding the one we just pushed, OR we just map everything.)
+                // Let's map everything except the last one if we want to be safe, but actually 1.5-flash is stateless so we need full history.
+                // Since we pushed userMsg to history before calling this, we map history.
+            });
+
+            // We need to construct the payload carefully. 
+            // The history contains the latest user message.
+            // We need to prepend system prompt if it's the start.
+            
+            const apiContents = [];
+            
+            // If history is small (just welcome + 1 user msg), prepend system prompt to the first user message
+            // However, 'contents' array logic:
+            
+            let firstUserMsgFound = false;
+            
+            for (let i = 0; i < chatHistory.length; i++) {
+                const msg = chatHistory[i];
+                if (i === 0 && msg.sender === 'bot') continue; // Skip local welcome
+                
+                let textContent = msg.text;
+                
+                // Inject system prompt into the VERY FIRST user message sent to API
+                if (!firstUserMsgFound && msg.sender === 'user') {
+                    textContent = SYSTEM_PROMPT + "\n\nPatient: " + textContent;
+                    firstUserMsgFound = true;
+                }
+
+                apiContents.push({
+                    role: msg.sender === 'user' ? 'user' : 'model',
+                    parts: [{ text: textContent }]
+                });
+            }
+
+            // Fallback models
+            const models = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro'];
+
+            for (const model of models) {
+                try {
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${API_KEY}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: apiContents,
+                            generationConfig: { temperature: 0.7, maxOutputTokens: 200 }
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        let text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                        
+                        // Clean Markdown
+                        if (text) {
+                             // Remove *, #, `, _, [, ] but keep -
+                            text = text.replace(/[\*\#\`\_\[\]]/g, ''); 
+                        }
+                        return text || "I'm evaluating your input. Could you provide more details?";
+                    } else {
+                        console.warn(`${model} failed.`);
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+            
+            return "I apologize, but I cannot connect to the medical database right now. Please check your connection.";
+        }
+
+    </script>
+</body>
+</html>
