@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dr. Serene - AI Medical Consultant</title>
+    <title>Empath AI - AI Medical Consultant</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -84,7 +84,7 @@
                 <div class="p-2 bg-blue-600 rounded-lg">
                     <i data-lucide="stethoscope" class="w-6 h-6 text-white"></i>
                 </div>
-                <h1 class="text-xl font-bold text-slate-800">Dr. Serene</h1>
+                <h1 class="text-xl font-bold text-slate-800">Empath AI</h1>
             </div>
             <p class="text-xs text-slate-500 mt-2">AI Medical Consultant</p>
         </div>
@@ -99,8 +99,8 @@
                     <span class="font-semibold text-sm">Emergency?</span>
                 </div>
                 <p class="text-xs text-red-600 mb-3">For medical emergencies, do not use this app.</p>
-                <button onclick="window.location.href='tel:911'" class="w-full bg-white border border-red-200 text-red-600 py-2 px-3 rounded-lg text-sm font-medium hover:bg-red-50 transition flex items-center justify-center active:scale-95">
-                    Call 911 (Emergency)
+                <button onclick="window.location.href='tel:108'" class="w-full bg-white border border-red-200 text-red-600 py-2 px-3 rounded-lg text-sm font-medium hover:bg-red-50 transition flex items-center justify-center active:scale-95">
+                    Call 108 (Emergency)
                 </button>
             </div>
 
@@ -143,7 +143,6 @@
     </aside>
 
     <!-- Main Chat Area -->
-    <!-- FIX: Removed h-full, added flex-1 and min-w-0 to prevent overflow issues -->
     <main class="flex-1 flex flex-col bg-slate-50 relative min-w-0 h-full">
         
         <!-- Header -->
@@ -156,14 +155,13 @@
                     <span class="font-bold text-slate-800">Medical Consultation</span>
                     <span class="text-xs text-blue-500 flex items-center">
                         <span class="w-2 h-2 bg-blue-500 rounded-full mr-1.5"></span>
-                        Dr. Serene Active
+                        Empath AI Active
                     </span>
                 </div>
             </div>
         </header>
 
         <!-- Messages Container -->
-        <!-- FIX: Added min-h-0. This is CRITICAL for nested flex containers to scroll properly on mobile -->
         <div id="chat-messages" class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 scroll-smooth w-full min-h-0">
             <div class="flex justify-center mb-8">
                 <span class="bg-slate-200/60 text-slate-500 text-xs py-1 px-3 rounded-full">
@@ -174,8 +172,9 @@
         </div>
 
         <!-- Input Area -->
-        <!-- FIX: Added z-20 to ensure it sits above other content if layers conflict -->
-        <div class="p-4 md:p-6 bg-white border-t border-slate-200 shrink-0 safe-bottom z-20">
+        <!-- FIX: Converted to floating card on mobile (mb-4 mx-2 rounded-2xl) to ensure visibility -->
+        <!-- Reverts to standard bar on desktop (md:mb-0 md:mx-0 md:rounded-none) -->
+        <div class="p-4 md:p-6 bg-white border-t border-slate-200 shrink-0 safe-bottom z-20 mb-4 mx-2 rounded-2xl shadow-lg border md:border-t md:border-x-0 md:border-b-0 md:mb-0 md:mx-0 md:rounded-none md:shadow-none">
             <form id="chat-form" class="max-w-4xl mx-auto relative flex items-center">
                 <input 
                     type="text" 
@@ -195,7 +194,7 @@
                 </button>
             </form>
             <p class="text-center text-[10px] text-slate-400 mt-3 hidden md:block">
-                Dr. Serene is an AI and can make mistakes. Always verify with a human professional.
+                Empath AI is an AI and can make mistakes. Always verify with a human professional.
             </p>
         </div>
     </main>
@@ -203,12 +202,12 @@
     <script>
         // --- Configuration ---
         const API_KEY = "AIzaSyDdSjlVHq073_R6nL9KliJH6lYJlS1zs_4";
-        const SYSTEM_PROMPT = "You are Dr. Serene, a professional medical doctor AI. Your goal is to solve health problems through a step-by-step interview. \n\nCRITICAL RULES:\n1. Ask ONLY ONE clarifying question at a time. Do not ask lists of questions.\n2. Keep your responses SHORT and concise (maximum 2-3 sentences).\n3. Do not provide a full diagnosis or treatment plan immediately. Gather information first through back-and-forth dialogue.\n4. Once you have enough info, provide a brief diagnosis and advice.\n5. ALWAYS explicitly state that you are an AI and this is not a substitute for in-person professional medical advice.\n6. If the user mentions self-harm, suicide, or heart attack/stroke symptoms, stop the interview and provide emergency resources immediately.\n7. Use bullet points (-) to structure lists or advice for better readability. Avoid bolding or other markdown.";
+        const SYSTEM_PROMPT = "You are Empath AI designed by Nithin Chatla & Nithish a highly experienced Primary Care Physician, Psychiatrist, and Psychologist. /nYour job is to act like a real doctor: calm, empathetic, non-judgmental, medically accurate, and extremely careful. /nYour Abilities /nDiagnose possible conditions based on symptoms /nProvide safe medical advice following global standards /n Explain medicines, dosage, side effects /nProvide mental health support like a psychologist /nProvide psychiatric guidance /n Assess risk levels (mild / moderate / severe) /nAsk follow-up questions like a real doctor /nProvide daily habits, exercises, diet, lifestyle corrections /nProvide emergency instructions /nHelp with common medical issues (fever, cold, infection, wounds, digestion, skin issues, sexual health, etc.) /nSafety Rules (VERY IMPORTANT) /nYou must: /nNever give harmful, illegal, or dangerous suggestions /nAlways recommend a doctor visit for serious conditions /nAvoid prescribing prescription medicines unless user already has them /nProvide emotional support for mental health queries /nKeep responses short, clear, empathetic, and medically correct /nIf user mentions suicide, panic, trauma, self-harm, switch to crisis support mode /nPersonality /nWarm /nHuman-like /nPatient /nSupportive /nSpeaks in simple language /nAdds emotional understanding /nAlways explains the “why” /nSounds like a real doctor talking to the patient /n🎯 RESPONSE FORMAT /nAlways follow this structure: /nEmpathy Message /nUnderstanding of the problem /nAsk 4–6 follow-up questions (very important) /nGive possible causes /nGive step-by-step solution / treatment /nWhat to avoid /nWhen to see a doctor urgently /nEncouragement message /n💬 EXAMPLE STARTER BEHAVIOR /n If the user says: I Have Chest pain /nDoctor should respond: /nShow concern /nAsk questions: location? duration? sharp/dull? breathing? sweating? family history? /nGive possible causes: muscle strain, anxiety, GERD, heart issue /nGive safe home care /nGive red-flag symptoms requiring hospital visit /nGive reassurance  /n This website is a Indian website and used by Indians . The Website Owner is Nithin Chatla";
 
         // --- State ---
         let chatHistory = [
             { 
-                text: "Hello, I am Dr. Serene. I'm here to help with your health concerns. Briefly tell me what you are feeling, and I will ask you a few questions to understand better.", 
+                text: "Hello, I’m your AI Health Companion 🤝💙🌿\nI’m here to support you with any medical questions 🩺, mental-health concerns 🧠💭, emotional struggles 😔💔, stress 😣, depression 🌧️, anxiety 😟, or other health problems.\nYou can talk to me safely — I listen without judgment 🤗✨\nHere’s how I can support you:\n💬 Emotional & mental support\n🌈 Tips for stress, anxiety & depression\n🩺 Understanding symptoms clearly\n💡 General medical information\n❤️ Steps to feel better and stay healthy\n👨‍⚕️ Guidance on when to see a real doctor\nIf you’re feeling lonely, low, scared, or overwhelmed — you’re not alone 💛🤝\nI’m here with you, every step of the way 💫🌟\nHow can I support you today? 😊", 
                 sender: 'bot', 
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
             }
@@ -349,7 +348,7 @@
             
             if (dangerKeywords.some(kw => lowerInput.includes(kw))) {
                 setTimeout(() => {
-                    addBotMessage("EMERGENCY ALERT: If you are experiencing a life-threatening emergency (like heart attack, stroke, or severe injury) or thoughts of self-harm, please call 911 or your local emergency number IMMEDIATELY. Do not wait for an AI response.");
+                    addBotMessage("EMERGENCY ALERT: If you are experiencing a life-threatening emergency (like heart attack, stroke, or severe injury) or thoughts of self-harm, please call 108 or your local emergency number IMMEDIATELY. Do not wait for an AI response.");
                 }, 1000);
                 return;
             }
