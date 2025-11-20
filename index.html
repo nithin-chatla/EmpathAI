@@ -17,14 +17,21 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            /* Use dynamic viewport height for mobile browsers */
+            /* fixed inset-0 locks the body to the viewport on mobile to prevent scroll issues */
+            position: fixed; 
+            inset: 0;
             height: 100dvh; 
+            width: 100vw;
             overflow: hidden;
         }
         
         /* Safe area padding for modern mobile devices (Notch/Home Bar) */
         .safe-bottom {
             padding-bottom: env(safe-area-inset-bottom);
+        }
+        
+        .pt-safe-top {
+            padding-top: env(safe-area-inset-top);
         }
         
         /* Animations */
@@ -43,7 +50,7 @@
             animation: fadeInUp 0.3s ease-out forwards;
         }
 
-        /* Custom Scrollbar - nice to have for desktop, hidden for cleaner mobile look */
+        /* Custom Scrollbar */
         .scrollbar-hide::-webkit-scrollbar {
             display: none;
         }
@@ -62,18 +69,17 @@
         }
     </style>
 </head>
-<!-- Flex-col on mobile, Flex-row on medium screens+ (Tablets/Laptops) -->
-<body class="bg-slate-50 text-slate-800 flex flex-col md:flex-row relative">
+<!-- Flex-col on mobile, Flex-row on medium screens+ -->
+<body class="bg-slate-50 text-slate-800 flex flex-col md:flex-row">
 
     <!-- Mobile Sidebar Overlay -->
     <div id="sidebar-overlay" class="fixed inset-0 bg-black/20 z-40 hidden backdrop-blur-sm md:hidden"></div>
 
     <!-- Sidebar -->
-    <!-- Z-index 50 ensures it floats above everything on mobile -->
     <aside id="sidebar" class="fixed md:relative z-50 h-full w-72 bg-white border-r border-slate-200 shadow-2xl md:shadow-none transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col">
         
         <!-- Sidebar Header -->
-        <div class="p-6 border-b border-slate-100 bg-blue-50/50 pt-safe-top">
+        <div class="p-6 border-b border-slate-100 bg-blue-50/50 pt-safe-top md:pt-6">
             <div class="flex items-center space-x-3 mb-1">
                 <div class="p-2 bg-blue-600 rounded-lg">
                     <i data-lucide="stethoscope" class="w-6 h-6 text-white"></i>
@@ -137,7 +143,8 @@
     </aside>
 
     <!-- Main Chat Area -->
-    <main class="flex-1 flex flex-col h-full w-full bg-slate-50 relative min-w-0">
+    <!-- FIX: Removed h-full, added flex-1 and min-w-0 to prevent overflow issues -->
+    <main class="flex-1 flex flex-col bg-slate-50 relative min-w-0 h-full">
         
         <!-- Header -->
         <header class="bg-white h-16 border-b border-slate-200 flex items-center justify-between px-4 md:px-8 sticky top-0 z-10 shrink-0">
@@ -156,7 +163,8 @@
         </header>
 
         <!-- Messages Container -->
-        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 scroll-smooth w-full">
+        <!-- FIX: Added min-h-0. This is CRITICAL for nested flex containers to scroll properly on mobile -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 scroll-smooth w-full min-h-0">
             <div class="flex justify-center mb-8">
                 <span class="bg-slate-200/60 text-slate-500 text-xs py-1 px-3 rounded-full">
                   Today
@@ -166,7 +174,8 @@
         </div>
 
         <!-- Input Area -->
-        <div class="p-4 md:p-6 bg-white border-t border-slate-200 shrink-0 safe-bottom">
+        <!-- FIX: Added z-20 to ensure it sits above other content if layers conflict -->
+        <div class="p-4 md:p-6 bg-white border-t border-slate-200 shrink-0 safe-bottom z-20">
             <form id="chat-form" class="max-w-4xl mx-auto relative flex items-center">
                 <input 
                     type="text" 
@@ -175,7 +184,6 @@
                     autocomplete="off"
                     class="w-full bg-slate-100 text-slate-800 placeholder-slate-400 border-0 rounded-2xl py-4 pl-5 pr-14 focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all shadow-inner outline-none text-base"
                 >
-                <!-- Text-base above prevents iOS zoom on focus -->
                 
                 <button 
                     type="submit" 
@@ -259,8 +267,6 @@
         }
 
         function renderMessages() {
-            // We clear and rebuild to ensure order, though appending is more efficient in huge chats. 
-            // For this scale, rebuilding is safer for state sync.
             chatMessages.innerHTML = `
                 <div class="flex justify-center mb-8">
                     <span class="bg-slate-200/60 text-slate-500 text-xs py-1 px-3 rounded-full">Today</span>
