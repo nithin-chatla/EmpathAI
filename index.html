@@ -348,21 +348,21 @@
             isTyping = true;
             showTypingIndicator();
 
-            // 2. Safety Check (Local)
+            // 2. Safety Check (Local) - Using a simple approach for now, model handles complex crisis detection
             const lowerInput = text.toLowerCase();
-            const dangerKeywords = ['suicide', 'kill myself', 'want to die', 'heart attack', 'stroke', 'severe bleeding'];
+            const dangerKeywords = ['suicide', 'kill myself', 'want to die', 'severe bleeding'];
             
             if (dangerKeywords.some(kw => lowerInput.includes(kw))) {
                 setTimeout(() => {
-                    addBotMessage("EMERGENCY ALERT: If you are experiencing a life-threatening emergency (like heart attack, stroke, or severe injury) or thoughts of self-harm, please call 108 or your local emergency number IMMEDIATELY. Do not wait for an AI response. I am here to listen, but your safety is paramount.");
-                    isTyping = false; // Reset typing flag
-                    removeTypingIndicator(); // Remove indicator
+                    addBotMessage("EMERGENCY ALERT: If you are experiencing thoughts of self-harm or a life-threatening emergency, please call 108 or your local emergency number IMMEDIATELY. Do not wait for an AI response. I am here to listen, but your immediate safety is paramount.");
+                    isTyping = false;
+                    removeTypingIndicator();
                 }, 1000);
                 return;
             }
 
             // 3. API Call
-            const responseText = await callGeminiAPI(text);
+            const responseText = await callGeminiAPI();
             addBotMessage(responseText);
         }
 
@@ -388,14 +388,14 @@
 
         // --- API Logic ---
 
-        async function callGeminiAPI(latestMessage) {
+        async function callGeminiAPI() {
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
             
-            // Prepare contents array from chat history (excluding local welcome message)
-            // Slice(1) skips the first locally-generated welcome message
+            // Prepare contents array from chat history, excluding the very first local welcome message
             const apiContents = chatHistory
                 .slice(1) 
                 .map(msg => ({
+                    // Ensure roles strictly alternate: user, model, user, model...
                     role: msg.sender === 'user' ? 'user' : 'model',
                     parts: [{ text: msg.text }]
                 }));
@@ -408,7 +408,7 @@
                 },
                 config: {
                     temperature: 0.7, 
-                    maxOutputTokens: 2000 // Increased token limit for detailed responses
+                    maxOutputTokens: 2000
                 }
             };
 
@@ -425,22 +425,40 @@
                     if (response.ok) {
                         const data = await response.json();
                         let text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                        
+                        if (!text) {
+                            // This means the API call was successful (200 OK) but returned no text content.
+                            // Check for block reasons (e.g., safety filtering)
+                            const finishReason = data.candidates?.[0]?.finishReason;
+                            if (finishReason === 'SAFETY') {
+                                console.error("Gemini API Error: Response blocked due to Safety filtering.");
+                                return "I'm sorry, but my response was filtered due to safety policies. If you are experiencing distress, please call an emergency number.";
+                            }
+                            console.error("Gemini API Error: Successful response, but no text content found in candidates.", data);
+                            return "I seem to be having trouble formulating a useful response. Could you rephrase your last message?";
+                        }
                         
-                        return text || "I'm evaluating your input. Could you provide more details?";
+                        return text;
                     } else {
-                        console.warn(`API call failed with status: ${response.status}`);
+                        // Handle non-200 status codes (e.g., 400, 500)
+                        const errorData = await response.json();
+                        console.error(`Gemini API Error: Status ${response.status}. Details:`, errorData);
+                        // Throw to trigger backoff/retry
+                        throw new Error(`API Error Status: ${response.status}`);
                     }
                 } catch (e) {
-                    console.error(`Attempt ${attempt + 1} failed (Network/Parse Error):`, e);
+                    // Network error or error thrown above
+                    console.error(`Attempt ${attempt + 1} failed (Error):`, e);
                 }
                 // Wait for exponential backoff before next attempt
                 if (attempt < MAX_RETRIES - 1) {
                     const delay = Math.pow(2, attempt) * 1000;
+                    // console.log(`Retrying in ${delay / 1000}s...`); // Optional logging for debugging
                     await new Promise(resolve => setTimeout(resolve, delay));
                 }
             }
             
-            return "I apologize, but I cannot connect to the medical database right now. Please check your connection or try again later.";
+            return "I apologize, but I cannot connect to the system right now after several attempts. Please check your internet connection or try again shortly.";
         }
 
     </script>
